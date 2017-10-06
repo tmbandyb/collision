@@ -34,9 +34,16 @@ class Grammar extends BaseGrammar
         'limit',
         'offset',
         'unions',
-        'lock'
-
+        'lock',
     ];
+    protected function compileWith(Builder $query, $with)
+    {
+        if (! empty($with)) {
+            return 'with '.join(', ',$with)." ";
+        }
+
+        return '';
+    }
 
     /**
      * Compile a select query into SQL.
@@ -81,7 +88,6 @@ class Grammar extends BaseGrammar
             // To compile the query, we'll spin through each component of the query and
             // see if that component exists. If it does we'll just call the compiler
             // function for the component which is responsible for making the SQL.
-           
             if (isset($query->$component) && ! is_null($query->$component)) {
                 $method = 'compile'.ucfirst($component);
 
@@ -144,16 +150,6 @@ class Grammar extends BaseGrammar
     protected function compileFrom(Builder $query, $table)
     {
         return 'from '.$this->wrapTable($table);
-    }
-
-    protected function compileWith(Builder $query, $with)
-    {
-        if (! empty($with)) {
-            //dd($with);
-            return 'with '.join(', ',$with)." ";
-        }
-
-        return '';
     }
 
     /**
@@ -341,7 +337,7 @@ class Grammar extends BaseGrammar
     {
         $between = $where['not'] ? 'not between' : 'between';
 
-        return $this->wrap($where['column']).' '.$between." ? and ?";
+        return $this->wrap($where['column']).' '.$between.' ? and ?';
     }
 
     /**
